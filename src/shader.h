@@ -1,43 +1,31 @@
 //
-// Created by User on 11/4/2025.
+// Created by User on 29/3/2025.
 //
 
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef SHADER_HELPER_H
+#define SHADER_HELPER_H
+#include <glad/glad.h>
+#include <cglm/cglm.h>
 
-#include "shader_helper.h"
+typedef struct {
+    GLuint id;
+} Shader;
 
-class Shader {
-    unsigned int id;
+/**
+ * Reads, compiles and links the given shader files to a new program.
+ * It is the combination of the previous functions
+ * @param vertexPath The path to the vertex shader.
+ * @param fragmentPath The path to the fragment shader.
+ * @return The ID of the shader program.
+ */
+GLuint create_shader_program(const char* vertexPath, const char* fragmentPath);
 
-    Shader(const char* vertexPath, const char* fragmentPath) {
-        id = createShaderProgram(vertexPath, fragmentPath);
-    }
+Shader create_shader(const char* vertexPath, const char* fragmentPath);
 
-    /**
-     * Activate the shader.
-     */
-    void use()
-    {
-        glUseProgram(ID);
-    }
+void shader_use(Shader shader);
+void shader_delete(Shader shader);
 
+void shader_u1i(Shader shader, const char* name, int val);
+void shader_uMat4f(Shader shader, const char* name, mat4 val);
 
-    void setBool(const char* name, bool value) const
-    {
-        glUniform1i(glGetUniformLocation(id, name), (int)value);
-    }
-
-    void setInt(const char* name, int value) const
-    {
-        glUniform1i(glGetUniformLocation(id, name), value);
-    }
-
-    void setFloat(const char* name, float value) const
-    {
-        glUniform1f(glGetUniformLocation(id, name), value);
-    }
-
-};
-
-#endif //SHADER_H
+#endif //SHADER_HELPER_H
