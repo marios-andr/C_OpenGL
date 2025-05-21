@@ -23,7 +23,7 @@ GLuint create_shader_program(const char* vertexPath, const char* fragmentPath);
 Shader create_shader(const char* vertexPath, const char* fragmentPath);
 
 void shader_use(Shader shader);
-void shader_delete(Shader shader);
+void shader_delete(Shader* shader);
 
 void shader_u1i(Shader shader, const char* name, int val);
 void shader_uMat4f(Shader shader, const char* name, mat4 val);

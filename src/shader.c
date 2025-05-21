@@ -99,8 +99,9 @@ void shader_use(Shader shader) {
     glUseProgram(shader.id);
 }
 
-void shader_delete(Shader shader) {
-    glDeleteProgram(shader.id);
+void shader_delete(Shader* shader) {
+    glDeleteProgram(shader->id);
+    shader->id = 0;
 }
 
 void shader_u1i(Shader shader, const char* name, int val) {

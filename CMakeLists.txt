@@ -16,6 +16,10 @@ add_executable(C_OpenGL src/main.c src/glad.c
         src/shader.h
         src/texture_helper.c
         src/texture_helper.h
+        src/mesh.c
+        src/mesh.h
+        src/camera.c
+        src/camera.h
 )
 
 # Link OpenGL and GLFW
