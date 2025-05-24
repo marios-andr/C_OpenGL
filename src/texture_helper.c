@@ -2,7 +2,7 @@
 #include "texture_helper.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 unsigned int gen_texture(char* texLocation) {
     int width, height;
