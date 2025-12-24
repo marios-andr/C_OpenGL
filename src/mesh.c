@@ -143,10 +143,10 @@ void model_to_shader(Model m, Shader shader) {
 Mesh shape_square() {
     float vertices[] = {
         // positions         // texture coords
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, // top right
-        0.5f, -0.5f, 0.0f, 1.0f, 1.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom left
-        -0.5f, 0.5f, 0.0f, 0.0f, 0.0f // top left
+        1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // top right
+        1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // bottom left
+        -1.0f, 1.0f, 0.0f, 0.0f, 0.0f // top left
     };
     unsigned int indices[] = {
         0, 1, 3, // first triangle
@@ -210,4 +210,57 @@ Mesh shape_cube() {
     };
 
     return mesh_init_attrib(cube, sizeof(cube), NULL, 0, 2, attribs);
+}
+
+Mesh shape_skybox() {
+    float cube[] = {
+        // positions
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
+
+    Attribute attribs[] = {
+        ATTRIB_POSITION
+    };
+
+    return mesh_init_attrib(cube, sizeof(cube), NULL, 0, 1, attribs);
 }

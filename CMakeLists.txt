@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(C_OpenGL C CXX)
+project(COpenGLLib C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -30,6 +30,10 @@ target_include_directories(COpenGLLib
 
 target_link_libraries(COpenGLLib PUBLIC OpenGL::GL glfw cglm)
 
+project(COpenGLTest C CXX)
+add_executable(COpenGLTest src/test/main.c)
+target_link_libraries(COpenGLTest COpenGLLib)
 
-add_executable(C_OpenGL src/main.c)
-target_link_libraries(C_OpenGL COpenGLLib)
+project(BlackHole C CXX)
+add_executable(BlackHole src/blackhole/main.c)
+target_link_libraries(BlackHole COpenGLLib)

@@ -62,4 +62,6 @@ void model_to_shader(Model m, Shader shader);
 Mesh shape_square();
 
 Mesh shape_cube();
+
+Mesh shape_skybox();
 #endif //MESH_H
