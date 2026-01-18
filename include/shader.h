@@ -26,6 +26,7 @@ void shader_use(Shader shader);
 void shader_delete(Shader* shader);
 
 void shader_u1i(Shader shader, const char* name, int val);
+void shader_u3f(Shader shader, const char* name, vec3 val);
 void shader_uMat4f(Shader shader, const char* name, mat4 val);
 
 #endif //SHADER_HELPER_H

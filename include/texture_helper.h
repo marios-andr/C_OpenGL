@@ -4,6 +4,7 @@
 unsigned int gen_texture(char* texLocation);
 unsigned int gen_texture_wh(char* texLocation, int* width, int* height);
 unsigned int gen_texture_whc(char* texLocation, int* width, int* height, int* nrChannels);
+unsigned int gen_skybox_texture(char* texLocation);
 
 unsigned int gen_texture_data(unsigned char* data, int width, int height, int nrChannels);
 

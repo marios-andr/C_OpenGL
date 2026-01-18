@@ -5,6 +5,8 @@
 #include "../external/glfw/src/internal.h"
 #include "stb/stb_image.h"
 
+#define min(X,Y) (((X) < (Y)) ? (X) : (Y))
+
 typedef unsigned char* Image;
 
 GLint get_image_format(int nrChannels) {
@@ -51,6 +53,38 @@ unsigned int gen_texture_whc(char* texLocation, int* width, int* height, int* nr
     return texture;
 }
 
+unsigned int gen_skybox_texture(char* texLocation) {
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load and generate the texture
+    int width, height, nrChannels;
+    float* data = stbi_loadf(texLocation, &width, &height, &nrChannels, 0);
+    if (data) {
+        GLint format = get_image_format(nrChannels);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, data);
+    } else {
+        printf("Failed to load texture: %s\n", stbi_failure_reason());
+    }
+    stbi_image_free(data);
+
+    return texture;
+}
+
+
+
+
+
+
+
+
 unsigned int gen_texture_data(Image data, int width, int height, int nrChannels) {
     GLuint texture;
     glGenTextures(1, &texture);
@@ -68,6 +102,8 @@ unsigned int gen_texture_data(Image data, int width, int height, int nrChannels)
 
     return texture;
 }
+
+
 
 Image image_subregion(Image source, int width, int height, int channels, int xOffset, int yOffset, int size) {
     int N = size * size * channels;
@@ -103,7 +139,6 @@ unsigned int gen_cube_map_single(char* textureLocation, int* width, int* height,
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    //"../resources/galaxy.jpg"
     Image data = stbi_load(textureLocation, width, height, nrChannels, 0);
     if (!data) {
         printf("Failed to load texture\n");

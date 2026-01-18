@@ -63,7 +63,7 @@ int main() {
     glfwSetWindowFocusCallback(window, focus_callback);
 
 
-    if (!gladLoadGLLoader(glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("Failed to initialize GLAD\n");
         return -1;
     }
@@ -88,7 +88,7 @@ int main() {
         model_init(-1.3f, 1.0f, -1.5f)
     };
 
-    GLuint tex1 = gen_texture("../resources/galaxytest.jpg");
+    GLuint tex1 = gen_texture("../resources/container.jpg");
 
     shader_use(shader);
     shader_u1i(shader, "uTexture", 0);

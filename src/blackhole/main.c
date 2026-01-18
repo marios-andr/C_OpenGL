@@ -1,10 +1,8 @@
-#include <minwindef.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
-#include <stb/stb_image.h>
 
 #include "mesh.h"
 #include "shader.h"
@@ -30,8 +28,8 @@ float ASPECT_RATIO = (float) INITIAL_WIDTH / (float) INITIAL_HEIGHT;
 bool is_fullscreen = false;
 
 Camera camera;
-float delta_time = 0.0f;
-float last_frame = 0.0f;
+double delta_time = 0.0f;
+double last_frame = 0.0f;
 
 bool first_mouse = true;
 float last_mouse_x = (float) INITIAL_WIDTH / 2;
@@ -50,7 +48,7 @@ int main() {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
-    GLFWwindow *window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "OpenGL Window", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Black Hole Sim", NULL, NULL);
     if (!window) {
         printf("Failed to create window\n");
         glfwTerminate();
@@ -65,64 +63,27 @@ int main() {
     glfwSetWindowFocusCallback(window, focus_callback);
 
 
-    if (!gladLoadGLLoader(glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         printf("Failed to initialize GLAD\n");
         return -1;
     }
 
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
+    unsigned int skybox_tex = gen_skybox_texture("../resources/starmap_2020_8k_gal.hdr");
 
     Shader skybox_shader = create_shader("../shaders/blackhole/skybox.vert", "../shaders/blackhole/skybox.frag");
     Shader shader = create_shader("../shaders/vertex_shader.vert", "../shaders/fragment_shader.frag");
 
-
-    //shader_u1i(skybox_shader, "uSkybox", 0);
-
-    //int width, height, channels;
-    //stbi_set_flip_vertically_on_load(1);
-    //unsigned char *data = stbi_load("../resources/galaxy.jpg", &width, &height, &channels, 3);
-//
-    //int newWidth = width / 4;
-    //int newHeight = height / 3;
-    //int size = min(newWidth, newHeight);
-    //size = (int)pow((int)sqrt(size), 2);
-    //GLuint textures[6];
-    //unsigned char* faces[6];
-    ///*right*/ faces[0] = image_subregion(data, width, height, channels, size * 2, size, size);
-    ///*left*/ faces[1] = image_subregion(data, width, height, channels, 0, size, size);
-    ///*top*/ faces[2] = image_subregion(data, width, height, channels, size, 0, size);
-    ///*bottom*/ faces[3] = image_subregion(data, width, height, channels, size, size * 2, size);
-    ///*front*/ faces[4] = image_subregion(data, width, height, channels, size, size, size);
-    ///*back*/ faces[5] = image_subregion(data, width, height, channels, size * 3, size, size);
-//
-    //for (int i = 0; i < 6; i++) {
-    //    textures[i] = gen_texture_data(faces[i], size, size, channels);
-    //    free(faces[i]);
-    //}
-
-    int width, height, channels;
-    GLuint cube_map = gen_cube_map_single("../resources/galaxy.jpg", &width, &height, &channels);
-
-    camera = camera_init(0.0f, 0.0f, 3.0f);
+    camera = camera_init(0.0f, 1.0f, 6.0f);
     camera_cursor_lock(&camera, window);
 
     Mesh skybox = shape_skybox();
-    Mesh square = shape_square();
-
-    Model squares[] = {
-        model_init(2.0f, 0.0f, 0.0f),
-        model_init(-2.0f, 0.0f, 0.0f),
-        model_init(0.0f, -2.0f, 0.0f),
-        model_init(0.0f, 2.0f, 0.0f),
-        model_init(0.0f, 0.0f, 0.0f),
-        model_init(4.0f, 0.0f, 0.0f),
-    };
 
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window)) {
-        float current_frame = glfwGetTime();
+        double current_frame = glfwGetTime();
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
 
@@ -134,7 +95,7 @@ int main() {
 
         shader_use(shader);
         camera_to_shader(camera, shader, ASPECT_RATIO);
-        mesh_bind(square);
+        //mesh_bind(square);
 
         //for (int i = 0; i < 6; i++) {
         //    glActiveTexture(GL_TEXTURE0);
@@ -146,13 +107,18 @@ int main() {
         //}
 
         // draw skybox as last
+
+
         glDepthFunc(GL_LEQUAL);
         glDepthMask(GL_FALSE);
         shader_use(skybox_shader);
         camera_to_shader(camera, skybox_shader, ASPECT_RATIO);
-        mesh_bind(skybox);
+        shader_u3f(skybox_shader, "camPos", camera.position);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cube_map);
+        glBindTexture(GL_TEXTURE_2D, skybox_tex);
+        shader_u1i(skybox_shader, "equirectangularMap", 0);
+
+        mesh_bind(skybox);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glDepthMask(GL_TRUE);
@@ -162,8 +128,7 @@ int main() {
         glfwPollEvents();
     }
 
-    mesh_destroy(&skybox);
-    //shader_delete(&skybox_shader);
+    shader_delete(&skybox_shader);
     shader_delete(&shader);
 
     glfwDestroyWindow(window);

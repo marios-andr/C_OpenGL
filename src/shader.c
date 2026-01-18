@@ -108,6 +108,10 @@ void shader_u1i(Shader shader, const char* name, int val) {
     glUniform1i(glGetUniformLocation(shader.id, name), val);
 }
 
+void shader_u3f(Shader shader, const char* name, vec3 val) {
+    glUniform3f(glGetUniformLocation(shader.id, name), val[0], val[1], val[2]);
+}
+
 void shader_uMat4f(Shader shader, const char* name, mat4 val) {
     glUniformMatrix4fv(glGetUniformLocation(shader.id, name), 1, GL_FALSE, (float*)val);
 }

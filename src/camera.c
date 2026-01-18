@@ -30,17 +30,17 @@ Camera camera_init(float x, float y, float z) {
     return cam;
 }
 
-void camera_view_matrix(Camera camera, mat4 *view) {
+void camera_view_matrix(Camera camera, mat4 view) {
     vec3 center;
     glm_vec3_add(camera.position, camera.front, center);
     glm_lookat(camera.position, center, camera.up, view);
 }
 
-void camera_projection_matrix(Camera camera, float aspect_ratio, mat4 *projection) {
+void camera_projection_matrix(const Camera camera, const float aspect_ratio, mat4 projection) {
     glm_perspective(glm_rad(camera.fov), aspect_ratio, 0.1f, 100.0f, projection);
 }
 
-void camera_to_shader(Camera camera, Shader shader, float aspect_ratio) {
+void camera_to_shader(const Camera camera, const Shader shader, const float aspect_ratio) {
     mat4 tmp;
     camera_view_matrix(camera, tmp);
     shader_uMat4f(shader, "view", tmp);
@@ -91,6 +91,8 @@ void camera_process_input(Camera *camera, GLFWwindow *window, float delta_time) 
 void camera_process_mouse(Camera *camera, GLFWwindow *window, float xOffset, float yOffset) {
     if (!camera->locked)
         return;
+
+
 
     const float sensitivity = camera->mouse_sensitivity;
     xOffset *= sensitivity;
