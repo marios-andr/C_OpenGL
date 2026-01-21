@@ -26,6 +26,8 @@ typedef struct {
 
 Camera camera_init(float x, float y, float z);
 
+void camera_update_vectors(Camera* camera);
+
 void camera_view_matrix(Camera camera, mat4 view);
 
 void camera_projection_matrix(Camera camera, float aspect_ratio, mat4 projection);
