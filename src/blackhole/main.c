@@ -91,6 +91,8 @@ int main() {
     glfwWaitEvents();
     FILE *ff = ffmpeg();
 
+
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -208,17 +210,23 @@ void focus_callback(GLFWwindow *window, int focused) {
 }
 
 FILE* ffmpeg() {
-    FILE *ffmpeg = popen(
+    char* string;
+    // TODO: Error checking for malloc
+    asprintf(&string,
         "ffmpeg -y "
         "-f rawvideo "
         "-pixel_format rgb24 "
-        "-video_size 1920x1080 "
+        "-video_size %dx%d "
         "-framerate 60 "
         "-i - "
         "-vf vflip "
         "-c:v libx264 -pix_fmt yuv420p "
-        "out.mp4",
+        "out.mp4", WIN_WIDTH, WIN_HEIGHT);
+
+    FILE *ffmpeg = popen(
+        string,
         "w"
     );
+    free(string);
     return ffmpeg;
 }
