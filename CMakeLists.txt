@@ -15,7 +15,7 @@ set(ENGINE_SOURCES
         src/texture_helper.c
         src/mesh.c
         src/camera.c
-        include/texture.h
+        src/utils.c
 )
 
 add_library(COpenGLLib ${ENGINE_SOURCES})

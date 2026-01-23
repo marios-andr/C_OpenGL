@@ -15,8 +15,6 @@ uniform float fov;
 uniform float time;
 uniform vec2 resolution;
 
-//uniform float time;
-
 const int MAX_STEPS = 2000;
 
 vec2 sphere_map(vec3 p) {

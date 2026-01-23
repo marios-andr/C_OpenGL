@@ -8,9 +8,10 @@
 #include "shader.h"
 #include "texture_helper.h"
 #include "camera.h"
+#include "utils.h"
 
-#define INITIAL_WIDTH 1700
-#define INITIAL_HEIGHT 1000
+#define INITIAL_WIDTH 800
+#define INITIAL_HEIGHT 500
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -21,6 +22,8 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 void focus_callback(GLFWwindow *window, int focused);
+
+FILE* ffmpeg();
 
 unsigned int WIN_WIDTH = INITIAL_WIDTH;
 unsigned int WIN_HEIGHT = INITIAL_HEIGHT;
@@ -74,6 +77,7 @@ int main() {
     unsigned int skybox_tex = gen_skybox_texture("../resources/starmap_2020_8k_gal.hdr");
 
     Shader shader = create_shader("../shaders/simple.vert", "../shaders/blackhole/black_hole.frag");
+    Mesh quad = shape_square();
 
     float cam_angle = 0;
     float cam_dist = 10.0f;
@@ -82,7 +86,10 @@ int main() {
 
     camera_cursor_lock(&camera, window);
 
-    Mesh quad = shape_square();
+    goFullscreen(window);
+    glfwPollEvents();
+    glfwWaitEvents();
+    FILE *ff = ffmpeg();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -121,10 +128,17 @@ int main() {
         mesh_bind(quad);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        unsigned char *buffer = malloc(WIN_WIDTH * WIN_HEIGHT * 3);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, WIN_WIDTH, WIN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+        fwrite(buffer, WIN_WIDTH * WIN_HEIGHT * 3, 1, ff);
+        free(buffer);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    pclose(ff);
 
     shader_delete(&shader);
 
@@ -139,21 +153,15 @@ void key_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS) {
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
         if (is_fullscreen) {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
             int xpos = (mode->width - INITIAL_WIDTH) / 2;
             int ypos = (mode->height - INITIAL_HEIGHT) / 2;
             glfwSetWindowMonitor(window, NULL, xpos, ypos, INITIAL_WIDTH, INITIAL_HEIGHT, GLFW_DONT_CARE);
             is_fullscreen = false;
         } else {
-            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-            glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            goFullscreen(window);
             is_fullscreen = true;
         }
     }
@@ -197,4 +205,20 @@ void focus_callback(GLFWwindow *window, int focused) {
     if (focused == GLFW_FALSE) {
         first_mouse = true;
     }
+}
+
+FILE* ffmpeg() {
+    FILE *ffmpeg = popen(
+        "ffmpeg -y "
+        "-f rawvideo "
+        "-pixel_format rgb24 "
+        "-video_size 1920x1080 "
+        "-framerate 60 "
+        "-i - "
+        "-vf vflip "
+        "-c:v libx264 -pix_fmt yuv420p "
+        "out.mp4",
+        "w"
+    );
+    return ffmpeg;
 }
