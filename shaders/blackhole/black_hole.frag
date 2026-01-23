@@ -15,7 +15,7 @@ uniform float fov;
 uniform float time;
 uniform vec2 resolution;
 
-const int MAX_STEPS = 2000;
+const int MAX_STEPS = 1500;
 
 vec2 sphere_map(vec3 p) {
     return vec2(atan(p.x,p.y)/M_PI*0.5+0.5, asin(p.z)/M_PI+0.5);

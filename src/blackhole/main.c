@@ -12,6 +12,7 @@
 
 #define INITIAL_WIDTH 800
 #define INITIAL_HEIGHT 500
+#define SCREEN_CAPTURE 0
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -87,9 +88,11 @@ int main() {
     camera_cursor_lock(&camera, window);
 
     goFullscreen(window);
-    glfwPollEvents();
     glfwWaitEvents();
+
+#if SCREEN_CAPTURE == 1
     FILE *ff = ffmpeg();
+#endif
 
 
 
@@ -130,17 +133,22 @@ int main() {
         mesh_bind(quad);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+#if SCREEN_CAPTURE == 1
         unsigned char *buffer = malloc(WIN_WIDTH * WIN_HEIGHT * 3);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glReadPixels(0, 0, WIN_WIDTH, WIN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buffer);
         fwrite(buffer, WIN_WIDTH * WIN_HEIGHT * 3, 1, ff);
         free(buffer);
+#endif
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+#if SCREEN_CAPTURE == 1
     pclose(ff);
+#endif
+
 
     shader_delete(&shader);
 
