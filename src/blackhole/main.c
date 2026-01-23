@@ -56,7 +56,7 @@ int main() {
     }
 
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(1); // v-sync
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -76,14 +76,17 @@ int main() {
     Shader shader = create_shader("../shaders/simple.vert", "../shaders/blackhole/black_hole.frag");
 
     float cam_angle = 0;
-    float cam_dist = 8.0f;
-    camera = camera_init(cam_dist * sinf(cam_angle), 0.0f, cam_dist * cosf(cam_angle));
+    float cam_dist = 10.0f;
+    camera = camera_init(cam_dist * sinf(cam_angle), 1.0f, cam_dist * cosf(cam_angle));
     camera.fov = 90.0f;
+
     camera_cursor_lock(&camera, window);
 
-    Mesh skybox = shape_skybox();
+    Mesh quad = shape_square();
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     while (!glfwWindowShouldClose(window)) {
         double current_frame = glfwGetTime();
@@ -93,19 +96,18 @@ int main() {
         key_input(window);
 
         cam_angle += - 0.1f * delta_time;
-        camera.position[0] = cam_dist * sinf(cam_angle);
+        camera.position[0] = cam_dist * sinf(cam_angle) - 1.5;
         camera.position[2] = cam_dist * cosf(cam_angle);
-        camera.yaw = - cam_angle * 180 / GLM_PI - 90.0f;
-        camera.pitch = 0;
+        camera.yaw = - cam_angle * 180 / GLM_PI - 85.0f;
+        camera.pitch = 0.0f;
         camera_update_vectors(&camera);
 
         //glClearColor(0.2f, 0.3f, 0.3f, 0.0f);
         glClearColor(26.0f/255.0f, 26.0f/255.0f, 30.0f/255.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glDepthFunc(GL_LEQUAL);
-        glDepthMask(GL_FALSE);
         shader_use(shader);
+        shader_u1f(shader, "time", current_frame);
         shader_u2f(shader, "resolution", WIN_WIDTH, WIN_HEIGHT);
         shader_u3f(shader, "cam_pos", camera.position);
         shader_u3f(shader, "cam_x", camera.right);
@@ -116,11 +118,9 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, skybox_tex);
         shader_u1i(shader, "equirectangularMap", 0);
 
-        mesh_bind(skybox);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        mesh_bind(quad);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -170,12 +170,12 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
         first_mouse = false;
     }
 
-    float xoffset = xpos - last_mouse_x;
-    float yoffset = last_mouse_y - ypos; // reversed since y-coordinates range from bottom to top
+    float x_offset = xpos - last_mouse_x;
+    float y_offset = last_mouse_y - ypos; // reversed since y-coordinates range from bottom to top
     last_mouse_x = xpos;
     last_mouse_y = ypos;
 
-    camera_process_mouse(&camera, window, xoffset, yoffset);
+    camera_process_mouse(&camera, window, x_offset, y_offset);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
