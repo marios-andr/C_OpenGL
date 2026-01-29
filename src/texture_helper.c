@@ -18,17 +18,7 @@ GLint get_image_format(int nrChannels) {
     }
 }
 
-unsigned int gen_texture(char* texLocation) {
-    int width, height;
-    return gen_texture_wh(texLocation, &width, &height);
-}
-
-unsigned int gen_texture_wh(char* texLocation, int* width, int* height) {
-    int nrChannels;
-    return gen_texture_whc(texLocation, width, height, &nrChannels);
-}
-
-unsigned int gen_texture_whc(char* texLocation, int* width, int* height, int* nrChannels) {
+unsigned int gen_texture_whcf(char* texLocation, int* width, int* height, int* nrChannels, GLint format) {
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -39,10 +29,8 @@ unsigned int gen_texture_whc(char* texLocation, int* width, int* height, int* nr
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // load and generate the texture
-    Image data = stbi_load(texLocation, width, height, nrChannels, 0);
+    unsigned char *data = stbi_load(texLocation, width, height, nrChannels, 0);
     if (data) {
-        GLint format = get_image_format(*nrChannels);
-
         glTexImage2D(GL_TEXTURE_2D, 0, format, *width, *height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
@@ -51,6 +39,25 @@ unsigned int gen_texture_whc(char* texLocation, int* width, int* height, int* nr
     stbi_image_free(data);
 
     return texture;
+}
+
+unsigned int gen_texture_whc(char* texLocation, int* width, int* height, int* nrChannels) {
+    return gen_texture_whcf(texLocation, width, height, nrChannels, GL_RGB);
+}
+
+unsigned int gen_texture_f(char* texLocation, GLint format) {
+    int width, height, nrChannels;
+    return gen_texture_whcf(texLocation, &width, &height, &nrChannels, format);
+}
+
+unsigned int gen_texture_wh(char* texLocation, int* width, int* height) {
+    int nrChannels;
+    return gen_texture_whc(texLocation, width, height, &nrChannels);
+}
+
+unsigned int gen_texture(char* texLocation) {
+    int width, height;
+    return gen_texture_wh(texLocation, &width, &height);
 }
 
 unsigned int gen_skybox_texture(char* texLocation) {
